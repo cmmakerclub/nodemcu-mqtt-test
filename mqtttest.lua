@@ -1,5 +1,5 @@
-local myFn = function(mac)
-    print("MAC ADDRESS: " .. mac)
+local myFn = function(mac, ip)
+    print("MAC ADDRESS: " .. mac, ip)
     -- init mqtt client with keepalive timer 120sec
     m = mqtt.Client("clientid", 120, "", "")
 
@@ -13,7 +13,7 @@ local myFn = function(mac)
     end
 
     m:on("connect", function()
-        -- create_callback("connected")()
+        create_callback("connected")()
         print("CONNECTED")
         m:publish("/topic/nat", "MAC:"..mac.." IP"..ip.. "CONNECTED",0,0, create_callback("sent"))
     end)
