@@ -15,7 +15,7 @@ local myFn = function(mac, ip)
       local str = "MAC: " .. mac .. " IP: " .. ip
       local publish_callback = function()
         print(str .. " SENT!");
-        m:subscribe({["topic/0"]=0,["/cmmc/nat/iot/central"]=0}, function(conn) 
+        m:subscribe({["topic/0"]=0,["/cmmc/nat/iot/central"]=0,["/cmmc/nat/iot/central/command"]=0}, function(conn)
           print("subscribe success")
         end) 
       end
@@ -30,6 +30,19 @@ local myFn = function(mac, ip)
       print(topic .. ":" ) 
       if data ~= nil then
         print(data)
+        if topic == "/cmmc/nat/iot/central/command/"..mac then
+            pin = 1
+            gpio.mode(pin,gpio.OUTPUT)
+          if data == "on" then
+            gpio.write(pin, gpio.HIGH)
+            print(gpio.read(pin))
+          else 
+            gpio.write(pin, gpio.LOW)
+            print(gpio.read(pin))
+          end
+
+        end
+
       end
     end)
 
