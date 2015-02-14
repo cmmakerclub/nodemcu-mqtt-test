@@ -13,7 +13,8 @@ local myFn = function(mac)
     end
 
     m:on("connect", function()
-        create_callback("connected")()
+        -- create_callback("connected")()
+        print("CONNECTED")
         m:publish("/topic/nat", "MAC:"..mac.." IP"..ip.. "CONNECTED",0,0, create_callback("sent"))
     end)
     m:on("offline", create_callback("offline"))
