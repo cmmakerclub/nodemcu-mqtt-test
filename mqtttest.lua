@@ -44,21 +44,34 @@ myFn = function(mac, ip, dht22)
   function publish_data1()
      if pub_sem == 0 then  -- Is the semaphore set=
        pub_sem = 1  -- Nop. Let's block it
-       print("-HEAP: " .. node.heap())  
+       print("--HEAP: " .. node.heap())  
        t, h = read_dht()
        if t == 0 then 
           print("read data error: " .. t .. " " .. h)
           pub_sem = 0  -- Unblock the semaphore
        else
-         m:publish("air", t..","..h..","..node.heap(),0,0, function(conn) 
+        local json_data_str = "{ \"clientId\":" .. CLIENTID .. "\"temp\":".. t .." , \"humid\":" .. h .. ", \"heap\":" .. node.heap()   .. "}"
+         m:publish("air", json_data_str, 0, 0, function(conn)
             -- Callback function. We've sent the data
             print("SENT! t: " .. t .. " h: " .. h)
             pub_sem = 0  -- Unblock the semaphore
             -- id1 = id1 +1 -- Let's increase our counter
-           print("+HEAP: " .. node.heap())  
+           print("==HEAP: " .. node.heap())  
          end)
        end
      end  
+  end
+
+  function publish_who_am_i()
+     if pub_sem == 0 then  -- Is the semaphore set=
+       pub_sem = 1  -- Nop. Let's block it
+       local json_data_str = "{ \"type\":" .. "DHT22" .. "\"clientId\":" .. CLIENTID .. "\"mac\":".. mac .." , \"ip\":" .. ip .. ", \"heap\":" .. node.heap()   .. "}"
+         m:publish("/boss", json_data_str, 0, 0, function(conn) 
+           pub_sem = 0
+         end)
+     else
+      -- do nothing
+     end
   end
 
 
@@ -84,7 +97,8 @@ myFn = function(mac, ip, dht22)
        print("Main program")
        print("HEAP: " .. node.heap())  
        
-       tmr.alarm(2, 5000, 1, publish_data1 )
+       tmr.alarm(2, 13000, 1, publish_data1 )
+       tmr.alarm(3, 37000, 1, publish_who_am_i)
        -- Callback to receive the subscribed topic messages. 
        -- m:on("message", function(conn, topic, data)
        --    print(topic .. ":" )
