@@ -6,18 +6,18 @@ if true then  --change to if true
     wifi.sta.connect()
     cnt = 0
     tmr.alarm(1, 1000, 1, function() 
-        if (wifi.sta.getip() == nil) and (cnt < 20) then 
+        if (wifi.sta.getip() == nil) and (cnt < 40) then 
             print("IP unavaiable, Waiting...")
             cnt = cnt + 1 
         else 
             tmr.stop(1)
             if (cnt < 40) then 
               print("Config done, IP is "..wifi.sta.getip())
-              print("Config done, IP is "..wifi.sta.getmac())
+              print("Config done, MAC is "..wifi.sta.getmac())
               dofile("mqtttest.lua")(wifi.sta.getmac(), wifi.sta.getip())
             else
               print("Wifi setup time more than 20s, Please verify wifi.sta.config() function. Then re-download the file.")
-			  node.restart()
+              node.restart()
             end
         end 
      end)
