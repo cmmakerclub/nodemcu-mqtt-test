@@ -1,4 +1,5 @@
-f = function()
+local f = function()
+  node.compile("dht22.lua")
   local dht22 = require("dht22")
   PIN = 4 --  data pin, GPIO2
 
