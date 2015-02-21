@@ -11,12 +11,13 @@ if true then  --change to if true
             cnt = cnt + 1 
         else 
             tmr.stop(1)
-            if (cnt < 20) then 
+            if (cnt < 40) then 
               print("Config done, IP is "..wifi.sta.getip())
               print("Config done, IP is "..wifi.sta.getmac())
               dofile("mqtttest.lua")(wifi.sta.getmac(), wifi.sta.getip())
-            else 
+            else
               print("Wifi setup time more than 20s, Please verify wifi.sta.config() function. Then re-download the file.")
+			  node.restart()
             end
         end 
      end)

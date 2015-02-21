@@ -9,7 +9,7 @@ myFn = function(mac, ip)
     m:lwt("/lwt", "offline", 0, 0);
 
     local create_callback = function(text)
-      local f =  function() print(text) end;
+      local f =  function() if text=="offline" then node.restart(); end; print(text) end;
 	  return f
     end
 
