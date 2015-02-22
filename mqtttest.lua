@@ -43,16 +43,17 @@ myFn = function(mac, ip, dht22)
 
   -- Sample publish functions:
   function publish_data1()
+     print("DATA-1")
      if pub_sem == 0 then  -- Is the semaphore set=
        pub_sem = 1  -- Nop. Let's block it
+       l_cnt = l_cnt + 1
        print("--HEAP: " .. node.heap())  
        t, h = read_dht()
        if t == 0 then 
           print("read data error: " .. t .. " " .. h)
           pub_sem = 0  -- Unblock the semaphore
        else
-         local jstr_1 = "{  \"cnt\": " .. lb_cnt .. ", \"clientId\":\"" .. CLIENTID .. "\", \"temp\":".. t ..", \"humid\":" .. h .. ", \"heap\":" .. node.heap()   .. "}"
-         print(jstr_1)
+         jstr_1 = "{  \"cnt\": ".. l_cnt .. ", \"collision\": " .. lb_cnt .. ", \"clientId\":\"" .. CLIENTID .. "\", \"temp\":".. t ..", \"humid\":" .. h .. ", \"heap\":" .. node.heap()   .. "}"
          m:publish("/nat/sensor/data/"..node.chipid(), jstr_1, 0, 0, function(conn)
             -- Callback function. We've sent the data
             print("SENT! t: " .. t .. " h: " .. h)
@@ -62,19 +63,22 @@ myFn = function(mac, ip, dht22)
          end)
        end
      else
+       print("DATA-1 -- IN LOCK ")
        lb_cnt = lb_cnt + 1
      end  
   end
 
   function publish_who_am_i()
+    print("WHO AM I")
      if pub_sem == 0 then  -- Is the semaphore set=
        pub_sem = 1  -- Nop. Let's block it
-       local jstr_2 = "{  \"cnt\": " .. lb_cnt .. ", \"type\":" .. "\"DHT22\"" .. ", \"clientId\": \"" .. CLIENTID .. "\", \"mac\":\"".. mac .."\", \"ip\":\"" .. ip .. "\", \"heap\":\"" .. node.heap() .. "\"}"
+       local jstr_2 = "{  \"cnt\": " .. l_cnt .. ", \"type\":" .. "\"DHT22\"" .. ", \"clientId\": \"" .. CLIENTID .. "\", \"mac\":\"".. mac .."\", \"ip\":\"" .. ip .. "\", \"heap\":\"" .. node.heap() .. "\"}"
          m:publish("/nat/sensor/boss", jstr_2 , 0, 0, function(conn) 
            pub_sem = 0
          end)
      else
       -- do nothing
+       print("WHO-2 -- IN LOCK ")
        lb_cnt = lb_cnt + 1
      end
   end
