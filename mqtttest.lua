@@ -13,7 +13,8 @@ myFn = function(mac, ip, dht22)
   pub_sem = 0         -- MQTT Publish semaphore. Stops the publishing whne the previous hasn't ended
   current_topic  = 1  -- variable for one currently being subscribed to
   topicsub_delay = 50 -- microseconds between subscription attempts, worked for me (local network) down to 5...YMMV
-  -- id1 = 0
+  lb_cnt = 0
+  l_cnt = 0
 
   -- connect to the broker
   print "Connecting to MQTT broker. Please wait..."
@@ -50,8 +51,9 @@ myFn = function(mac, ip, dht22)
           print("read data error: " .. t .. " " .. h)
           pub_sem = 0  -- Unblock the semaphore
        else
-        local json_data_str = "{ \"clientId\":" .. CLIENTID .. "\"temp\":".. t .." , \"humid\":" .. h .. ", \"heap\":" .. node.heap()   .. "}"
-         m:publish("air", json_data_str, 0, 0, function(conn)
+         local jstr_1 = "{  \"cnt\": " .. lb_cnt .. ", \"clientId\":\"" .. CLIENTID .. "\", \"temp\":".. t ..", \"humid\":" .. h .. ", \"heap\":" .. node.heap()   .. "}"
+         print(jstr_1)
+         m:publish("/nat/sensor/data/"..node.chipid(), jstr_1, 0, 0, function(conn)
             -- Callback function. We've sent the data
             print("SENT! t: " .. t .. " h: " .. h)
             pub_sem = 0  -- Unblock the semaphore
@@ -59,18 +61,21 @@ myFn = function(mac, ip, dht22)
            print("==HEAP: " .. node.heap())  
          end)
        end
+     else
+       lb_cnt = lb_cnt + 1
      end  
   end
 
   function publish_who_am_i()
      if pub_sem == 0 then  -- Is the semaphore set=
        pub_sem = 1  -- Nop. Let's block it
-       local json_data_str = "{ \"type\":" .. "DHT22" .. "\"clientId\":" .. CLIENTID .. "\"mac\":".. mac .." , \"ip\":" .. ip .. ", \"heap\":" .. node.heap()   .. "}"
-         m:publish("/boss", json_data_str, 0, 0, function(conn) 
+       local jstr_2 = "{  \"cnt\": " .. lb_cnt .. ", \"type\":" .. "\"DHT22\"" .. ", \"clientId\": \"" .. CLIENTID .. "\", \"mac\":\"".. mac .."\", \"ip\":\"" .. ip .. "\", \"heap\":\"" .. node.heap() .. "\"}"
+         m:publish("/nat/sensor/boss", jstr_2 , 0, 0, function(conn) 
            pub_sem = 0
          end)
      else
       -- do nothing
+       lb_cnt = lb_cnt + 1
      end
   end
 
@@ -84,6 +89,9 @@ myFn = function(mac, ip, dht22)
     h = dht22.getHumidity()
 
     if h == nil or t == nil then
+      print("NILL H: ")
+      print(h)
+      print(t)
       return 0, 0
     else
       return t, h
@@ -97,8 +105,8 @@ myFn = function(mac, ip, dht22)
        print("Main program")
        print("HEAP: " .. node.heap())  
        
-       tmr.alarm(2, 13000, 1, publish_data1 )
-       tmr.alarm(3, 37000, 1, publish_who_am_i)
+       tmr.alarm(2, 5000, 1, publish_data1 )
+       tmr.alarm(3, 7000, 1, publish_who_am_i)
        -- Callback to receive the subscribed topic messages. 
        -- m:on("message", function(conn, topic, data)
        --    print(topic .. ":" )
