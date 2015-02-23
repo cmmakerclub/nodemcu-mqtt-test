@@ -44,6 +44,9 @@ myFn = function(mac, ip, dht22)
   -- Sample publish functions:
   function publish_data1()
      print("DATA-1")
+     if lb_cnt > 20 then
+       node.restart()
+     end
      if pub_sem == 0 then  -- Is the semaphore set=
        pub_sem = 1  -- Nop. Let's block it
        l_cnt = l_cnt + 1
@@ -70,6 +73,9 @@ myFn = function(mac, ip, dht22)
 
   function publish_who_am_i()
     print("WHO AM I")
+    if lb_cnt > 20 then
+      node.restart()
+    end
      if pub_sem == 0 then  -- Is the semaphore set=
        pub_sem = 1  -- Nop. Let's block it
        local jstr_2 = "{  \"cnt\": " .. l_cnt .. ", \"type\":" .. "\"DHT22\"" .. ", \"clientId\": \"" .. CLIENTID .. "\", \"mac\":\"".. mac .."\", \"ip\":\"" .. ip .. "\", \"heap\":\"" .. node.heap() .. "\"}"
