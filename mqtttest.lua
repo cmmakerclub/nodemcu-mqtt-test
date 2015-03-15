@@ -1,6 +1,7 @@
 myFn = function(mac, ip, dht22)
   -- Configuration to connect to the MQTT broker.
-  BROKER = "192.168.1.1"   -- Ip/hostname of MQTT broker
+  -- BROKER = "192.168.1.1"   -- Ip/hostname of MQTT broker
+  BROKER = "128.199.191.223"   -- Ip/hostname of MQTT broker
   BRPORT = 1883             -- MQTT broker port
   BRUSER = ""           -- If MQTT authenitcation is used then define the user
   BRPWD  = ""            -- The above user password
@@ -8,14 +9,15 @@ myFn = function(mac, ip, dht22)
 
   -- MQTT topics to subscribe
   -- topics = {"topic1","topic2","topic3","topic4"} -- Add/remove topics to the array
-
+  
   -- Control variables.
   pub_sem = 0         -- MQTT Publish semaphore. Stops the publishing whne the previous hasn't ended
   current_topic  = 1  -- variable for one currently being subscribed to
   topicsub_delay = 50 -- microseconds between subscription attempts, worked for me (local network) down to 5...YMMV
   lb_cnt = 0
   l_cnt = 0
-
+  
+  
   -- connect to the broker
   print "Connecting to MQTT broker. Please wait..."
   m = mqtt.Client( CLIENTID, 120, BRUSER, BRPWD)
@@ -25,7 +27,7 @@ myFn = function(mac, ip, dht22)
        print("HEAP: " .. node.heap())  
        run_main_prog()
   end)
-
+  
   m:on("offline", function(con) node.restart() end)
 
   -- function mqtt_sub()
@@ -58,7 +60,31 @@ myFn = function(mac, ip, dht22)
           print("read data error: " .. t .. " " .. h)
           pub_sem = 0  -- Unblock the semaphore
        else
-         jstr_1 = "{ \"mac\":\"".. mac .."\", \"ip\":\"" .. ip .. "\", \"type\": \"DHT22\", \"cnt\": ".. l_cnt .. ", \"collision\": " .. lb_cnt .. ", \"clientId\":\"" .. CLIENTID .. "\", \"temp\":".. t ..", \"humid\":" .. h .. ", \"heap\":" .. node.heap()   .. "}"
+         type="DHT22" 
+         heap=node.heap()
+
+         -- heap="HEAP"
+         -- mac = "MAC"
+         -- ip="IP" 
+         -- l_cnt="_L_CNT"
+         -- CLIENTID="CID"
+         -- t="30"
+         -- h="HH"
+
+
+         jstr_1 =           string.format("'{ ");
+         jstr_1 = jstr_1 .. string.format('"mac": %q, ', mac)
+         jstr_1 = jstr_1 .. string.format('"ip": %q, ', ip)
+         jstr_1 = jstr_1 .. string.format('"type": %q, ', type)
+         jstr_1 = jstr_1 .. string.format('"cnt": %q, ', l_cnt)
+         jstr_1 = jstr_1 .. string.format('"collision": %q, ', lb_cnt)
+         jstr_1 = jstr_1 .. string.format('"clientId": %q, ', CLIENTID)
+         jstr_1 = jstr_1 .. string.format('"temp": %q, ', t)
+         jstr_1 = jstr_1 .. string.format('"humid": %q, ', h)
+         jstr_1 = jstr_1 .. string.format('"heap": %q ', heap)
+         jstr_1 = jstr_1 .. string.format("}'")
+         print(jstr_1)
+
          m:publish("/nat/sensor/data/esp8266/"..node.chipid(), jstr_1, 0, 0, function(conn)
             -- Callback function. We've sent the data
             print("SENT! t: " .. t .. " h: " .. h)
