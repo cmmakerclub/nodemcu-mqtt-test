@@ -26,6 +26,8 @@ myFn = function(mac, ip, dht22)
        run_main_prog()
   end)
 
+  m:on("offline", function(con) node.restart() end)
+
   -- function mqtt_sub()
   --      if table.getn(topics) < current_topic then
   --           -- if we have subscribed to all topics in the array, run the main prog
@@ -56,8 +58,8 @@ myFn = function(mac, ip, dht22)
           print("read data error: " .. t .. " " .. h)
           pub_sem = 0  -- Unblock the semaphore
        else
-         jstr_1 = "{  \"cnt\": ".. l_cnt .. ", \"collision\": " .. lb_cnt .. ", \"clientId\":\"" .. CLIENTID .. "\", \"temp\":".. t ..", \"humid\":" .. h .. ", \"heap\":" .. node.heap()   .. "}"
-         m:publish("/nat/sensor/data/"..node.chipid(), jstr_1, 0, 0, function(conn)
+         jstr_1 = "{ \"mac\":\"".. mac .."\", \"ip\":\"" .. ip .. "\", \"type\": \"DHT22\", \"cnt\": ".. l_cnt .. ", \"collision\": " .. lb_cnt .. ", \"clientId\":\"" .. CLIENTID .. "\", \"temp\":".. t ..", \"humid\":" .. h .. ", \"heap\":" .. node.heap()   .. "}"
+         m:publish("/nat/sensor/data/esp8266/"..node.chipid(), jstr_1, 0, 0, function(conn)
             -- Callback function. We've sent the data
             print("SENT! t: " .. t .. " h: " .. h)
             pub_sem = 0  -- Unblock the semaphore
@@ -70,25 +72,6 @@ myFn = function(mac, ip, dht22)
        lb_cnt = lb_cnt + 1
      end  
   end
-
-  function publish_who_am_i()
-    print("WHO AM I")
-    if lb_cnt > 20 then
-      node.restart()
-    end
-     if pub_sem == 0 then  -- Is the semaphore set=
-       pub_sem = 1  -- Nop. Let's block it
-       local jstr_2 = "{  \"cnt\": " .. l_cnt .. ", \"type\":" .. "\"DHT22\"" .. ", \"clientId\": \"" .. CLIENTID .. "\", \"mac\":\"".. mac .."\", \"ip\":\"" .. ip .. "\", \"heap\":\"" .. node.heap() .. "\"}"
-         m:publish("/nat/sensor/boss", jstr_2 , 0, 0, function(conn) 
-           pub_sem = 0
-         end)
-     else
-      -- do nothing
-       print("WHO-2 -- IN LOCK ")
-       lb_cnt = lb_cnt + 1
-     end
-  end
-
 
   function read_dht()
     PIN = 4 --  data pin, GPIO2
@@ -116,7 +99,7 @@ myFn = function(mac, ip, dht22)
        print("HEAP: " .. node.heap())  
        
        tmr.alarm(2, 5000, 1, publish_data1 )
-       tmr.alarm(3, 7000, 1, publish_who_am_i)
+       -- tmr.alarm(3, 7000, 1, publish_who_am_i)
        -- Callback to receive the subscribed topic messages. 
        -- m:on("message", function(conn, topic, data)
        --    print(topic .. ":" )
