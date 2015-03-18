@@ -29,22 +29,6 @@ myFn = function(mac, ip, dht22)
   
   m:on("offline", function(con) node.restart() end)
 
-  -- function mqtt_sub()
-  --      if table.getn(topics) < current_topic then
-  --           -- if we have subscribed to all topics in the array, run the main prog
-  --           run_main_prog()
-  --      else
-  --           --subscribe to the topic
-  --           m:subscribe(topics[current_topic] , 0, function(conn)
-  --                print("Subscribing topic: " .. topics[current_topic - 1] )
-  --           end)
-  --           current_topic = current_topic + 1  -- Goto next topic
-  --           --set the timer to rerun the loop as long there is topics to subscribe
-  --           tmr.alarm(5, topicsub_delay, 0, mqtt_sub )
-  --      end
-  -- end
-
-  -- Sample publish functions:
   function publish_data1()
      print("DATA-1")
      if lb_cnt > 20 then
@@ -122,25 +106,14 @@ myFn = function(mac, ip, dht22)
     else
       return t, h
     end
-
   end
 
 
   --main program to run after the subscriptions are done
   function run_main_prog()
        print("Main program")
-       print("HEAP: " .. node.heap())  
-       
+       print("HEAP: " .. node.heap())
        tmr.alarm(2, 5000, 1, publish_data1 )
-       -- tmr.alarm(3, 7000, 1, publish_who_am_i)
-       -- Callback to receive the subscribed topic messages. 
-       -- m:on("message", function(conn, topic, data)
-       --    print(topic .. ":" )
-       --    if (data ~= nil ) then
-       --      print("HEAP: " .. node.heap())  
-       --      print ( data )
-       --    end
-       --  end )
   end
 end
 
