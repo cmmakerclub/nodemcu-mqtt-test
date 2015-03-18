@@ -1,7 +1,6 @@
 myFn = function(mac, ip, dht22)
   -- Configuration to connect to the MQTT broker.
-  -- BROKER = "192.168.1.1"   -- Ip/hostname of MQTT broker
-  BROKER = "128.199.191.223"   -- Ip/hostname of MQTT broker
+  BROKER = "192.168.1.1"   -- Ip/hostname of MQTT broker
   BRPORT = 1883             -- MQTT broker port
   BRUSER = ""           -- If MQTT authenitcation is used then define the user
   BRPWD  = ""            -- The above user password
@@ -60,7 +59,10 @@ myFn = function(mac, ip, dht22)
           print("read data error: " .. t .. " " .. h)
           pub_sem = 0  -- Unblock the semaphore
        else
-         type="DHT22" 
+         sensor="DHT22" 
+         -- type can be sensor or actuator
+         type="sensor" 
+         mcu="ESP8266"
          heap=node.heap()
 
          -- heap="HEAP"
@@ -72,20 +74,25 @@ myFn = function(mac, ip, dht22)
          -- h="HH"
 
 
-         jstr_1 =           string.format("'{ ");
+         jstr_1 =           string.format("{ ");
          jstr_1 = jstr_1 .. string.format('"mac": %q, ', mac)
          jstr_1 = jstr_1 .. string.format('"ip": %q, ', ip)
-         jstr_1 = jstr_1 .. string.format('"type": %q, ', type)
+         jstr_1 = jstr_1 .. string.format('"sensor": %q, ', sensor)
+         jstr_1 = jstr_1 .. string.format('"mcu": %q, ', mcu)
+
          jstr_1 = jstr_1 .. string.format('"cnt": %q, ', l_cnt)
          jstr_1 = jstr_1 .. string.format('"collision": %q, ', lb_cnt)
          jstr_1 = jstr_1 .. string.format('"clientId": %q, ', CLIENTID)
+
          jstr_1 = jstr_1 .. string.format('"temp": %q, ', t)
          jstr_1 = jstr_1 .. string.format('"humid": %q, ', h)
          jstr_1 = jstr_1 .. string.format('"heap": %q ', heap)
-         jstr_1 = jstr_1 .. string.format("}'")
+
+         jstr_1 = jstr_1 .. string.format("}")
+
          print(jstr_1)
 
-         m:publish("/nat/sensor/data/esp8266/"..node.chipid(), jstr_1, 0, 0, function(conn)
+         m:publish("/nat/sensor/data", jstr_1, 0, 0, function(conn)
             -- Callback function. We've sent the data
             print("SENT! t: " .. t .. " h: " .. h)
             pub_sem = 0  -- Unblock the semaphore
