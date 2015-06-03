@@ -5,9 +5,6 @@ myFn = function(mac, ip, dht22)
   BRUSER = ""           -- If MQTT authenitcation is used then define the user
   BRPWD  = ""            -- The above user password
   CLIENTID = "ESP8266-" ..  node.chipid() -- The MQTT ID. Change to something you like
-
-  -- MQTT topics to subscribe
-  -- topics = {"topic1","topic2","topic3","topic4"} -- Add/remove topics to the array
   
   -- Control variables.
   pub_sem = 0         -- MQTT Publish semaphore. Stops the publishing whne the previous hasn't ended
@@ -22,7 +19,6 @@ myFn = function(mac, ip, dht22)
   m = mqtt.Client( CLIENTID, 120, BRUSER, BRPWD)
   m:connect( BROKER , BRPORT, 0, function(conn)
        print("Connected to MQTT:" .. BROKER .. ":" .. BRPORT .." as " .. CLIENTID )
-       -- mqtt_sub() --run the subscription function
        print("HEAP: " .. node.heap())  
        run_main_prog()
   end)
@@ -48,15 +44,6 @@ myFn = function(mac, ip, dht22)
          type="sensor" 
          mcu="ESP8266"
          heap=node.heap()
-
-         -- heap="HEAP"
-         -- mac = "MAC"
-         -- ip="IP" 
-         -- l_cnt="_L_CNT"
-         -- CLIENTID="CID"
-         -- t="30"
-         -- h="HH"
-
 
          jstr_1 =           string.format("{ ");
          jstr_1 = jstr_1 .. string.format('"mac": %q, ', mac)
