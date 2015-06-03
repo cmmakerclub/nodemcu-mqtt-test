@@ -1,3 +1,4 @@
+-- original version is https://primalcortex.wordpress.com/2015/02/06/nodemcu-and-mqtt-how-to-start/
 myFn = function(mac, ip, dht22)
   -- Configuration to connect to the MQTT broker.
   BROKER = "192.168.1.1"   -- Ip/hostname of MQTT broker
